@@ -7,9 +7,11 @@ st.set_page_config('Curva Tarefas', layout='wide')
 
 @st.cache_resource
 def load_data():
-    schema = {'cod_unb': pl.Int64, 'cod_pdv': pl.Int64, 'id_sku': pl.Int64, 'segmentacao_primaria': pl.Utf8, 'task_text': pl.Utf8, 'visit_date': pl.Utf8, 'task_coins': pl.Int64, 'QTDE TASKS TOTAIS': pl.Int64, '% TASKS VALIDADAS': pl.Utf8, '% Pontos Validados': pl.Utf8} 
-    data = pl.scan_csv('pontos_bees/*.csv', separator=';', schema=schema)
-    data = data.with_columns([pl.col(x).str.replace(',','.').cast(pl.Float32) for x in ['% TASKS VALIDADAS','% Pontos Validados']])
+    #schema = {'cod_unb': pl.Int64, 'cod_pdv': pl.Int64, 'id_sku': pl.Int64, 'segmentacao_primaria': pl.Utf8, 'task_text': pl.Utf8, 'visit_date': pl.Utf8, 'task_coins': pl.Int64, 'QTDE TASKS TOTAIS': pl.Int64, '% TASKS VALIDADAS': pl.Utf8, '% Pontos Validados': pl.Utf8} 
+    #data = pl.scan_csv('pontos_bees/*.csv', separator=';', schema=schema)
+    #data = data.with_columns([pl.col(x).str.replace(',','.').cast(pl.Float32) for x in ['% TASKS VALIDADAS','% Pontos Validados']])
+    #data.collect().write_parquet('pontos_bees/pontos.parquet')
+    data = pl.scan_parquet('pontos_bees/*.parquet')
     cliente = pl.scan_parquet('data/cliente.parquet')
     seg_consolidado = pl.scan_parquet('data/seg_consolidado.parquet')
     produtos = pl.scan_parquet('data/produtos.parquet')
