@@ -78,7 +78,7 @@ final = data\
 chart = alt.Chart(final).mark_point().encode(
     x = alt.X('task_coins', sort=alt.SortField('sort_number')),
     y = alt.Y('conversão').scale(zero=True),
-).properties(width = 1200, height = 600)
+).properties(height = 600)
 
 line = chart.transform_regression('task_coins','conversão', order = 3, method='poly', extent=[50,500], params = False).mark_line()
 params = chart.transform_regression('task_coins','conversão', order = 3, method='poly', extent=[50,500], params = True).mark_line()
@@ -105,7 +105,7 @@ point = alt.Chart(final).mark_point(color = 'red', shape = 'cross').encode(
 col1, col2 = st.columns([3,1])
 
 with col1:
-    st.altair_chart((chart + line + point))
+    st.altair_chart((chart + line + point), use_container_width=True)
 with col2:
     st.metric('Quantidade de Tarefas:', final['quantidade'].sum())
     st.metric('Quantidade Ideal de Pontos:', points_x[points_y.index(round(kl.knee_y,3))])
