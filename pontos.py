@@ -2,6 +2,9 @@ import polars as pl
 import altair as alt
 import streamlit as st
 
+import altair_transform
+from kneed import KneeLocator
+import pandas as pd
 
 st.set_page_config('Curva Tarefas', layout='wide')
 
@@ -77,10 +80,36 @@ chart = alt.Chart(final).mark_point().encode(
     y = alt.Y('conversão').scale(zero=True),
 ).properties(width = 1200, height = 600)
 
-line = chart.transform_regression('task_coins','conversão', order = 3, method='poly', extent=[50,500]).mark_line()
+line = chart.transform_regression('task_coins','conversão', order = 3, method='poly', extent=[50,500], params = False).mark_line()
+params = chart.transform_regression('task_coins','conversão', order = 3, method='poly', extent=[50,500], params = True).mark_line()
 
-st.altair_chart((chart + line))
 
+coefs = altair_transform.extract_data(params)
+
+points_x = list(range(50,500))
+points_y = [round(coefs['coef'][0][3]*x**3 + coefs['coef'][0][2]*x**2 + coefs['coef'][0][1]*x + coefs['coef'][0][0],3) for x in points_x]
+
+if coefs['coef'][0][3] > 0:
+    c = 'concave'
+else:
+    c = 'convex'
+
+kl = KneeLocator(points_x, points_y, curve=c)
+#st.write(kl.knee_y, points_x[points_y.index(round(kl.knee_y,3))])
+
+point = alt.Chart(final).mark_point(color = 'red', shape = 'cross').encode(
+    x = alt.datum(points_x[points_y.index(kl.knee_y)]),
+    y = alt.datum(kl.knee_y)
+)
+
+col1, col2 = st.columns([3,1])
+
+with col1:
+    st.altair_chart((chart + line + point))
+with col2:
+    st.metric('Quantidade de Tarefas:', final['quantidade'].sum())
+    st.metric('Quantidade Ideal de Pontos:', points_x[points_y.index(round(kl.knee_y,3))])
+    
 st.dataframe(final)
 
     
